@@ -1,0 +1,206 @@
+* Stream based ECS (217 Tokens)
+
+This module provides a simple framework for entity-component system
+programming.
+
+** Other pico-8/lua ECS frameworks
+   * Entity Component System, by selfsame
+     (https://www.lexaloffle.com/bbs/?tid=30039)
+   * Tiny ECS Framework, by KatrinaKitten
+     (https://www.lexaloffle.com/bbs/?pid=80110)
+   * tiny-ecs, by github user bakpakin
+     (https://github.com/bakpakin/tiny-ecs)
+   * pecs, by jesstelford (https://github.com/jesstelford/pecs)
+
+** Why /this/ ECS?
+   ~stream-ecs~ weighs in at just over twice as many tokens as
+   KatrinaKitten's Tiny ECS Framework (108 tokens) and is a bit more
+   complex on the inside. Despite it's larger initial footprint,
+   ~stream-ecs~ /should/ end up saving you tokens in the long-run
+   because it manages a bunch of things for you --- entity queues in
+   particular --- automatically.
+   
+** Usage
+*** Including ~stream-ecs~ in your project
+   To use ~stream-ecs~, either copy the conents of ~stream-ecs.lua~
+   into your pico-8 project or copy ~stream-ecs.lua~ into your project
+   file and include it:
+
+   #+begin_src lua
+#include stream-ecs.lua
+   #+end_src
+   
+*** Initialize the system   
+    Use the ~ecs()~ function to initalize the variable which will be
+    the main interface to the system.
+
+    #+begin_src lua
+world = ecs()
+    #+end_src
+    
+*** Defining components    
+    Define components with the ~component()~ function.
+
+    #+begin_src lua
+timer = component('timer', {'t'})
+position = component('position', {'x', 'y'})
+    #+end_src
+    
+    The first argument to ~component()~ is the name of the component
+    which will be used when defining systems. In the above examples
+    the variable name and the component name are the same; while this
+    is probably most sensible way to do it, it's not required. The
+    following definition is perfectly valid.
+
+    #+begin_src lua
+position = component('pos', {'x', 'y'})
+    #+end_src
+
+    The second argument to ~component()~ defines the named fields of
+    the component: positions have an x-coordinate and a y-coordinate,
+    for instance.
+    
+    The ~component()~ function itself returns a constructor function
+    which creates a table with the given fields which saves you from
+    having to write those functions yourself thereby saving tokens.
+
+    #+begin_src lua
+p = position(1, 2)
+p.x -- 1
+p.y -- 2
+    #+end_src
+
+*** Create entities
+    Entities are created with the ~entity()~ function.
+
+    #+begin_src lua
+character = entity()
+    #+end_src
+    
+    You can then attach components with the ~:add()~ method.
+
+    #+begin_src lua
+character:add(position(1, 2))
+character:add(timer(0))
+    #+end_src
+    
+    The ~:add()~ method returns the entity, so calls to ~:add()~ can be
+    chained together. A simpler way to create the ~character~ entity
+    would be this:
+
+    #+begin_src lua
+character = entity()
+   :add(position(1, 2))
+   :add(timer(0))
+    #+end_src
+    
+    Component are accessed as keys on the entity object:
+
+    #+begin_src lua
+character.position.x -- 1
+character.position.y -- 2
+character.timer.t    -- 0
+    #+end_src
+
+*** Systems
+**** Defining systems
+    Systems are defined with the ~:system()~ method on the ~world~ object.
+
+    #+begin_src lua
+function increment_timer(ent)
+   ent.timer.t += 1
+end
+
+function move_character(ent)
+   ent.position.y += ent.timer.t
+end
+
+world
+   :system({'timer'}, increment_timer)
+   
+world
+   :system({'timer', 'position'}, move_character)
+    #+end_src
+
+    Each call to ~:system()~ creates a new sub-ecs which filters out
+    only those entities with the necessary components and then assigns
+    a function to be run on each matching entity. Since ~:system()~
+    creates a sub-ecs we can chain calls together to create a sort of
+    ecs sieve. The following is functionally identical to the above
+    example.
+
+    #+begin_src lua
+world
+   :system({'timer'}, increment_timer)
+   :system({'position'}, move_character)
+    #+end_src
+
+    The first call to ~:system()~ filters out all those entities with
+    a ~timer~ component. Of those entities with a ~timer~ only those
+    which /also/ have a ~position~ make it through the second
+    ~:system()~ call.
+    
+    You can save intermediate systems in variables to create a
+    branching point.
+
+    #+begin_src lua
+world_timer = world
+   :system({'timer'}, increment_timer)
+
+world_timer
+   :sytem({'physics'}, do_physics) -- matches entities with timer and
+				   -- physics components
+
+world_timer
+   :system({'animation'}, do_animation) -- matches entities with timer
+					-- and animation components
+    #+end_src
+    
+**** Making it all work
+     Before your ECS will do anything you need to insert entities into
+     it.
+
+    #+begin_src lua
+world:insert(character)
+    #+end_src
+    
+    Then update them each cycle.
+
+    #+begin_src lua
+function update()
+   world:run()
+end
+    #+end_src
+    
+    The ~:run()~ method updates every entity contained in ~world~
+    according to the systems you've defined.
+
+    When an entity is inserted into ~world~ it is passed to all direct
+    child systems of ~world~ which either store it in their own queue
+    or discard it as appropriate. Those systems then pass their
+    entities to their own child systems for further filtering and so
+    on. The result is that each system maintains a queue of
+    (references to) the entities which match their
+    selectors. Importantly, this filtering only happens once per
+    entity when it is inserted: entities are /not/ filtered every
+    cycle. When ~world:run()~ is called, all systems simply process their
+    respective queues starting with ~world~ and working their way down.
+    
+    Since ~stream-ecs~ works by filtering you should /always/ insert
+    entities into the top-level system object and not any subsystems.
+
+    #+begin_src lua
+-- Do this:
+world
+   :insert(character)
+
+-- Don't do this!:
+world_timer
+   :insert(character)
+    #+end_src
+
+    Similarly, there is a ~:remove()~ method which removes an entity
+    from /all/ system queues and should, therefore, normally only be
+    called on the top-level system object.
+** Next steps
+   Check out the demos to see a few simple uses in action.
