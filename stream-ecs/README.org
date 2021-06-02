@@ -1,4 +1,4 @@
-* Stream based ECS (217 Tokens)
+* Stream based ECS (267 Tokens)
 
 This module provides a simple framework for entity-component system
 programming.
@@ -13,12 +13,11 @@ programming.
    * pecs, by jesstelford (https://github.com/jesstelford/pecs)
 
 ** Why /this/ ECS?
-   ~stream-ecs~ weighs in at just over twice as many tokens as
-   KatrinaKitten's Tiny ECS Framework (108 tokens) and is a bit more
-   complex on the inside. Despite it's larger initial footprint,
-   ~stream-ecs~ /should/ end up saving you tokens in the long-run
-   because it manages a bunch of things for you --- entity queues in
-   particular --- automatically.
+   ~stream-ecs~ is a bit heavier, token-wise, than some of the others
+   and a bit more complex on the inside. Despite it's larger initial
+   footprint, ~stream-ecs~ /should/ end up saving you tokens in the
+   long-run because it manages a bunch of things for you --- entity
+   queues in particular --- automatically.
    
 ** Usage
 *** Including ~stream-ecs~ in your project
@@ -167,7 +166,7 @@ world:insert(character)
     Then update them each cycle.
 
     #+begin_src lua
-function update()
+function _update()
    world:run()
 end
     #+end_src
@@ -202,5 +201,35 @@ world_timer
     Similarly, there is a ~:remove()~ method which removes an entity
     from /all/ system queues and should, therefore, normally only be
     called on the top-level system object.
-** Next steps
-   Check out the demos to see a few simple uses in action.
+**** Drawing
+     ~stream-ecs~ defines a default ~draw~ component and manages a
+     default draw system. The ~draw~ component takes a function as its
+     only argument which is reponsible for rendering the entity to the screen.
+
+     #+begin_src lua
+function draw_character(e)
+   spr(1, e.position.x, e.position.y)
+end
+
+character = entity()
+   :add(position(64, 64))
+   :add(draw(draw_character))
+     #+end_src
+     
+     To draw all drawable entities call the ~:draw()~ method on
+     ~world~ inside the pico-8 ~_draw()~ function.
+
+     #+begin_src lua
+function _draw()
+   cls()
+   world:draw()
+end
+     #+end_src
+     
+** Running the demos
+   To run the demos: 
+   1. Copy the entire ~stream-ecs~ directory into your pico-8 carts
+      directory
+   2. From the pico-8 commandline type: ~cd stream-ecs/demos~
+   3. Load one of the demos: ~load particles.p8~
+   4. And run it by typing ~run~ or ctrl-r
