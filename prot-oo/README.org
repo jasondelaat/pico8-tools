@@ -1,0 +1,205 @@
+* Prototype based Object-oriented programming
+** Usage
+*** Including ~prot-oo~ in your project
+   To use ~prot-oo~, either copy the conents of ~prot-oo.lua~
+   into your pico-8 project or copy ~prot-oo.lua~ into your project
+   file and include it:
+
+   #+begin_src lua
+#include prot-oo.lua
+   #+end_src
+   
+*** The base ~object~
+    Essentially, ~prot-oo~ implements a single object --- creatively
+    called ~object~, as one would expect --- on which other objects
+    in your system can be based.
+    
+*** Prototypes using ~create~
+    To use an object as a prototype for a new object we use the
+    ~create~ method. 
+
+    #+begin_src lua
+chris = object:create()
+    #+end_src
+    
+    The creates the object ~chris~ with ~object~ as it's
+    prototype. Now we can add new properties and/or methods:
+
+    #+begin_src lua
+chris.name = 'chris'
+function chris:say_hi()
+   print('hi, my name is '..self.name)
+end
+chris:say_hi() -- hi, my name is chris
+    #+end_src
+    
+    We can, in turn, use the ~chris~ object as a prototype for other
+    objects.
+
+    #+begin_src lua
+lee = chris:create()
+lee.name = 'lee'
+
+-- method inherited from chris
+lee:say_hi() -- hi, my name is lee
+    #+end_src
+
+*** Copying with ~assign~
+    We can use the ~assign~ method to copy the properties and methods
+    of one object to another. Note, however, that this is a /shallow/
+    copy only: it should work fine for simple properties such as
+    numbers and strings, etc. but may not work as expected if the
+    properties are tables.
+
+    #+begin_src lua
+a = object:create()
+a.first = 1
+a.second = 2
+
+b = object:create()
+b.second = 'two'
+b.third = 'three'
+
+a:assign(b) -- assigns the properties of 'b' to object 'a'
+print(a.first)  -- 1
+print(a.second) -- two
+print(a.third)  -- three
+    #+end_src
+    
+    Next, an example of the problem with table properties and ~assign~
+
+    #+begin_src lua
+a = object:create()
+a.prop = {x=1, y=2}
+
+b = object:create()
+b:assign(a)
+
+-- Changing 'prop' on 'b' also changes it on 'a'
+b.prop.x = 42
+print(a.prop.x) -- 42
+    #+end_src
+
+*** Classes (well, not really) with ~new~
+    Prototype based OO languages don't have/need Classes as a
+    construct but that doesn't mean we can't create a "class" or
+    collection of objects which all behave similarly and have similar
+    properties. 
+    
+    Let's re-create Chris and Lee from above but this time using a
+    ~person~ "class."
+    
+    The first thing we do is ~create~ an ~object~ to use as our base.
+
+    #+begin_src lua
+person = object:create()
+    #+end_src
+    
+    Then we define methods on that base object. Importantly, we /must/
+    create a method called ~init~ which initializes any variables that
+    the objects will need. After that, we can add any other methods we
+    want.
+
+    #+begin_src lua
+function person:init(name)
+   self.name = name
+end
+
+function person:say_hi()
+   print('hi, my name is '..self.name)
+end
+    #+end_src
+    
+    Then we create our instances using ~new~
+
+    #+begin_src lua
+chris = person:new('chris')
+lee = person:new('lee')
+chris:say_hi() -- hi, my name is chris
+lee:say_hi()   -- hi, my name is lee
+    #+end_src
+    
+    ~new~ first creates a new object using ~person~ as the
+    prototype. Any arguments that you pass to ~new~ are then passed
+    along to ~init~ which initializes the object. All "instances" of
+    person share the same methods but have their own data.
+    
+    When creating objects via this method, best practice is to only
+    define /methods/ on the base "class" object and initialize all
+    /properties/ inside the ~init~ method. Adding properties to the
+    base object will result in every instance getting a /copy/ of that
+    property which may or may not be what you want. In particular,
+    properties added to the base object are /not/ static properties
+    shared by all instances. But you can create static-like properties
+    by using a table:
+
+    #+begin_src lua
+myclass = object:create()
+myclass.static = {num_instances=0}
+function myclass:init()
+   self.static.num_instances += 1
+end
+
+a = myclass:new()
+b = myclass:new()
+c = myclass:new()
+print(a.static.num_instances)       -- 3
+print(b.static.num_instances)       -- 3
+print(c.static.num_instances)       -- 3
+print(myclass.static.num_instances) -- 3
+    #+end_src
+
+*** "Class" Inheritance
+    Inheritance in prototype based OO is really just using one object
+    as the prototype for another. If both the new object and the
+    prototype object are "classes" in the sense defined above then we
+    get a reasonable approximation of a class-based inheritance model.
+
+    #+begin_src lua
+point=object:create()
+function point:init(x, y)
+   self.x=x
+   self.y=y
+end
+function point:show()
+   print('('..self.x..','..self.y..')')
+end
+p1=point:new(1, 2)
+p1:show() -- (1, 2)
+
+point3D=point:create() -- inherit from point
+function point3D:init(x, y, z)
+   self.proto.init(self, x, y) -- call prototype methods
+   self.z=z
+end
+function point3D:show()
+   print('('..self.x..','..self.y..','..self.z..')')
+end
+p2=point3D:new(1, 2, 3)
+p2:show() -- (1, 2, 3)
+    #+end_src
+    
+    There are two main things to notice from this example: Every
+    instance has a ~proto~ property which is a reference to the
+    prototype object and methods on ~proto~ are invoked with the dot
+    operator and by passing ~self~ explicitly as the first argument.
+    
+    If, instead, you tried this:
+
+    #+begin_src lua
+function point3D:init(x, y, z)
+   self.proto:init(x, y) -- this won't work!
+   self.z=z
+end
+    #+end_src
+    
+    You would end up initializing the prototype object, ~point~,
+    itself rather than the ~point3D~ /instance./
+
+** Running the demos
+   To run the demos: 
+   1. Copy the entire ~prot-oo~ directory into your pico-8 carts
+      directory
+   2. From the pico-8 commandline type: ~cd prot-oo/demos~
+   3. Load one of the demos: ~load points.p8~
+   4. And run it by typing ~run~ or ctrl-r
