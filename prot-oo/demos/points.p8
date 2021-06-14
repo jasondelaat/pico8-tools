@@ -3,20 +3,6 @@ version 32
 __lua__
 #include ../prot-oo.lua
 #include points.lua
-myclass = object:create()
-myclass.static = {num_instances=0}
-function myclass:init()
-   self.static.num_instances += 1
-end
-
-a = myclass:new()
-b = myclass:new()
-c = myclass:new()
-print(a.static.num_instances)
-print(b.static.num_instances)
-print(c.static.num_instances)
-print(myclass.static.num_instances)
-
 __gfx__
 00000000224444222244442222444422224444220000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000244fff22244fff22244fff22244fff220000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
