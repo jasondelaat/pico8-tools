@@ -228,6 +228,7 @@ end
      
 ** Running the demos
    To run the demos: 
+   Run one of the included carts, or
    1. Copy the entire ~stream-ecs~ directory into your pico-8 carts
       directory
    2. From the pico-8 commandline type: ~cd stream-ecs/demos~
