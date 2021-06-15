@@ -1,6 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
+-- stream-ecs: platformer demo
+-- author: jason delaat
 #include ../stream-ecs.lua
 #include platform.lua
 __gfx__
