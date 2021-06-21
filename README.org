@@ -10,4 +10,15 @@
    Prototype based object-oriented programming based, roughly, on
    javascript's OO model.
 
+** ~string-gram~ 104 Tokens
+   Functions for creating context-free generative string grammars.
+   
+* License note
+  Due to the strict character limit of PICO-8 cartridges, it is not
+  necessary to include the full license text in the source files
+  themselves. Providing the copyright notice and the url to the full
+  license
+  (https://github.com/jasondelaat/pico8-tools/blob/release/LICENSE) is
+  sufficient.
+
    
