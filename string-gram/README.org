@@ -1,0 +1,115 @@
+* Context-free generative string grammars
+** Usage
+*** Including ~string-gram~ in your project
+   To use ~string-gram~, either copy the conents of ~string-gram.lua~
+   into your pico-8 project or copy ~string-gram.lua~ into your project
+   directory and include it in your ~.p8~ file:
+
+   #+begin_src lua
+#include string-gram.lua
+   #+end_src
+   
+*** API
+    ~string-gram~ provides a number of functions to help you build a
+    grammar and it's easily extensible via custom rule
+    functions. Grammar rules are just functions which take no
+    arguments and return a string.
+    
+**** ~lit~
+     The ~lit~ function takes a string as input and produces a rule
+     which will generate that string when called:
+
+     #+begin_src lua
+h = lit('hello') -- h is a rule, aka a function of 0 arguments.
+print(h()) -- prints 'hello'
+     #+end_src
+
+**** ~seq~
+     The ~seq~ function takes any number of rules as input and
+     produces a new rule which outputs the result of each rule in sequence.
+
+     #+begin_src lua
+h = lit('hello')
+c = lit(', ')
+w = lit('world')
+hw = seq(h, c, w)
+print(hw()) -- prints 'hello, world'
+     #+end_src
+     
+**** ~choice~
+     The ~choice~ function takes any number of rules as input and
+     outputs a new rule which outputs the result of one of those rules
+     chosen at random.
+
+     #+begin_src lua
+a = lit('a')
+b = lit('b')
+ab = choice(a, b)
+print(ab()) -- prints either 'a' or 'b' at random
+     #+end_src
+     
+**** ~copy~
+     The ~copy~ function takes a single rule and an integer, /n/ as input
+     and outputs a new rule which applies the given rule /n/ times.
+
+     #+begin_src lua
+a = lit('a')
+aaa = copy(a, 3)
+print(aaa()) -- prints 'aaa'
+     #+end_src
+     
+**** ~sym~ and ~register~
+     Grammars are often defined recursively so you may find yourself
+     needing to include one rule, which you haven't yet defined,
+     inside the definition of some other rule. ~sym~ and ~register~
+     solve this problem by allowing you to insert a 'symbolic' rule
+     which will be looked up at a later time when it's actually
+     called.
+
+     #+begin_src lua
+one = lit('1')
+
+-- This won't work!
+-- many_ones = choice(one, seq(one, many_ones))
+
+-- Instead, we use a symbolic rule...
+many_ones = choice(one, seq(one, sym('1s')))
+
+-- ...and then use register to insert the rule into a lookup table.
+register('1s', many_ones)
+
+print(many_ones()) -- prints random number of 1s
+                   -- ex: 1, 111, 1111111111111, etc
+     #+end_src
+     
+**** Custom rules
+     Rules are just functions which take no arguments and return a
+     string so you can easily create your own rules or functions which
+     create rules. For instance, suppose you want to create a rule
+     that randomly returns the output from another rule or else
+     returns an empty string. One way to do that would be like so:
+
+     #+begin_src lua
+function zero_or_one(rule)
+   return function()
+      if rnd() > 0.5 then
+	 return rule()
+      else
+	 return ''
+      end
+   end
+end
+
+a = lit('a')
+a_or_not = zero_or_one(a)
+print(a_or_not()) -- prints either one 'a' or nothing with 50/50 probability
+     #+end_src
+   
+** Running the demos
+   To run the demos: 
+   Run one of the included carts, or
+   1. Copy the entire ~string-gram~ directory into your pico-8 carts
+      directory
+   2. From the pico-8 commandline type: ~cd string-gram/demos~
+   3. Load one of the demos: ~load scroller.p8~
+   4. And run it by typing ~run~ or ctrl-r
