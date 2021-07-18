@@ -45,7 +45,7 @@ function draw_entities(self)
 end
 
 function ecs(names, f, is_child)
-   new_ecs = {
+   local new_ecs = {
       _map=f or function(x) return x end,
       _filter=names or {},
       _children={},
