@@ -1,0 +1,171 @@
+* State Machines
+
+This module provides two slightly different implementations for
+managing state machines.
+
+- state-machines-du (107 Tokens) :: each state has its own draw and
+     update methods
+- state-machines-st (111 Tokens) :: each state has setup and teardown
+     methods which are run only when the state is entered and exited
+     respectively
+
+** Usage
+*** Including ~state-machines-*~ in your project
+   To use ~state-machines-\*~, either copy the conents of ~state-machines-\*.lua~
+   into your pico-8 project or copy ~state-machines-\*.lua~ into your project
+   directory and include it:
+
+   #+begin_src lua
+#include state-machines-du.lua
+   #+end_src
+   
+   Or:
+
+   #+begin_src lua
+#include state-machines-st.lua
+   #+end_src
+
+*** Creating a state machine
+    To create a new state machine use the 'new' method:
+
+   #+begin_src lua
+sm = state_machine:new()
+   #+end_src
+
+*** Adding states
+    After creating the machine itself you need to add states. A state
+    consists of four things:
+
+    - A unique name or identifier :: Most likely a string but can be
+         anything as long as it's unique.
+    - A transition function :: This function is called once per cycle
+         and should return the identifier of the state the machine
+         should switch to.
+    - An update (or setup) function :: The update function is called
+         once per cycle and should update variables, etc. associated
+         with the state. For state-machine-st.lua, this is instead a
+         setup function which is only run once each time the machine
+         enters this state.
+    - A draw (or teardown) function :: The draw function is called
+         once per cycle and should draw everything relevant to the
+         state. For state-machine-st.lua, this is instead a teardown
+         function which is only run once each time the machine exits
+         this state.
+	 
+
+    Add a state to the machine using the 'add_state' method:
+
+   #+begin_src lua
+sm:add_state(
+   -- identifier
+   'a state',
+
+   -- transition function
+   function()
+      if btnp(5) then
+	 return 'some other state'
+      else
+	 return 'a state'
+      end
+   end,
+
+   -- update function
+   function()
+      if timer then
+	 timer += 1
+      else
+	 timer = 0
+      end
+   end,
+
+   -- draw function
+   function()
+      print(timer)
+   end
+)
+   #+end_src
+
+*** Using the state machine
+
+**** state-machine-du.lua
+     Once you've created a state machine and added some states using it
+     is simple: Set the initial state then call the update and draw
+     methods.
+
+    #+begin_src lua
+function _init()
+   sm:set_state('a state')
+end
+
+function _update()
+   sm:update()
+end
+
+function _draw()
+   cls()
+   sm:draw()
+end
+    #+end_src
+    
+    The update method calls the current state's transition function
+    and changes the current state if necessary and then calls the
+    current state's update function. The draw method calls the current
+    state's draw function.
+    
+**** state-machine-st.lua
+     The setup/teardown version is basically the same except there is
+     no draw method and the update method does a bit more work, so all
+     you need is this:
+     
+    #+begin_src lua
+function _init()
+   sm:set_state('state 1')
+end
+
+function _update()
+   sm:update()
+   -- whatever other update stuff you need to do.
+end
+
+function _draw()
+   cls()
+   -- whatever draw stuff you need to do.
+end
+    #+end_src
+     
+    The update method in this version also calls the transition
+    function. If a state change is necessary, then the current state's
+    teardown function is called, then the current state is changed,
+    and finally the new state's setup function is called.
+    
+*** API
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
+    | state_machine:new() |            | a new state machine, sm  |                           |
+    |                     |            |                          |                           |
+    | sm:add_state()      | name       | nil                      | state-machine-du.lua      |
+    |                     | transition |                          |                           |
+    |                     | update     |                          |                           |
+    |                     | draw       |                          |                           |
+    |                     |            |                          |                           |
+    | sm:add_state()      | name       | nil                      | state-machine-st.lua      |
+    |                     | transition |                          |                           |
+    |                     | setup      |                          |                           |
+    |                     | teardown   |                          |                           |
+    |                     |            |                          |                           |
+    | sm:set_state()      | name       | nil                      |                           |
+    |                     |            |                          |                           |
+    | sm:update()         | nil        | nil                      |                           |
+    |                     |            |                          |                           |
+    | sm:draw()           | nil        | nil                      | state-machine-du.lua only |
+    |                     |            |                          |                           |
+    | sm:get_state()      | nil        | the current state object |                           |
+
+** Running the demos
+   To run the demos: 
+   Run one of the included carts, or
+   1. Copy the entire ~state-machines-*~ directory into your pico-8 carts
+      directory
+   2. From the pico-8 commandline type: ~cd state-machines/demos~
+   3. Load one of the demos: ~load platform-tut.p8~
+   4. And run it by typing ~run~ or ctrl-r
