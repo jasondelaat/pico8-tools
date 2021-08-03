@@ -12,6 +12,14 @@
 
 ** ~string-gram~ 104 Tokens
    Functions for creating context-free generative string grammars.
+
+** ~jump-tuner~
+   An interactive tool for tuning jump behaviour.
+
+** ~state-machines~ 107/111 Tokens
+   Two slightly different implementations of a state machine manager.
+
+   
    
 * License note
   Due to the strict character limit of PICO-8 cartridges, it is not
