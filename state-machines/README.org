@@ -167,7 +167,7 @@ end
 ** Running the demos
    To run the demos: 
    Run one of the included carts, or
-   1. Copy the entire ~state-machines-*~ directory into your pico-8 carts
+   1. Copy the entire ~state-machines~ directory into your pico-8 carts
       directory
    2. From the pico-8 commandline type: ~cd state-machines/demos~
    3. Load one of the demos: ~load platform-tut.p8~
