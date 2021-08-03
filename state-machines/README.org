@@ -11,8 +11,8 @@ managing state machines.
 
 ** Usage
 *** Including ~state-machines-*~ in your project
-   To use ~state-machines-\*~, either copy the conents of ~state-machines-\*.lua~
-   into your pico-8 project or copy ~state-machines-\*.lua~ into your project
+   To use ~state-machines-*~, either copy the conents of ~state-machines-*.lua~
+   into your pico-8 project or copy ~state-machines-*.lua~ into your project
    directory and include it:
 
    #+begin_src lua
@@ -143,22 +143,40 @@ end
     |---------------------+------------+--------------------------+---------------------------|
     | state_machine:new() |            | a new state machine, sm  |                           |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:add_state()      | name       | nil                      | state-machine-du.lua      |
     |                     | transition |                          |                           |
     |                     | update     |                          |                           |
     |                     | draw       |                          |                           |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:add_state()      | name       | nil                      | state-machine-st.lua      |
     |                     | transition |                          |                           |
     |                     | setup      |                          |                           |
     |                     | teardown   |                          |                           |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:set_state()      | name       | nil                      |                           |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:update()         | nil        | nil                      |                           |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:draw()           | nil        | nil                      | state-machine-du.lua only |
     |                     |            |                          |                           |
+
+    | method              | arguments  | returns                  | note                      |
+    |---------------------+------------+--------------------------+---------------------------|
     | sm:get_state()      | nil        | the current state object |                           |
 
 ** Running the demos
