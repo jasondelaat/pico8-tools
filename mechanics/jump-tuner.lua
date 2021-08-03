@@ -17,6 +17,7 @@ function _init()
    cursor_pos = 0
    actual_height = 120
    frame = 3
+   t=0
    ----------------------------------------------------------
 end
 
@@ -24,6 +25,7 @@ function _update60()
    -- jump handling code --------
    if btn(5) and onground then
       actual_height = 120 -- this can be deleted
+      t = 0
       ay = initial_acceleration
       onground = false
       jumping = true
@@ -62,6 +64,9 @@ function _update60()
    if y < actual_height then
       actual_height = y
    end
+   if not onground then
+      t += 1
+   end
    if btnp(2) then
       cursor_pos = (cursor_pos - 1) % 3
    elseif btnp(3) then
@@ -87,6 +92,7 @@ function _draw()
    print('alpha:'..alpha)
    print('---------------')
    print('actual height:'..(120 - actual_height))
+   print('jump time:'..t)
    cur_y = 2 + cursor_pos * 6
    spr(2, 47, cur_y)
    spr(2, 94, cur_y, 1, 1, true)
