@@ -1,0 +1,201 @@
+#+startup: inlineimages
+
+* Signed Distance Functions
+  Signed distance functions (SDFs) are functions which measure the
+  distance from any point in space to the nearest boundary of some set
+  of objects. Distances on the /exterior/ of the boundary are positive
+  while distances on the /interior/ of the boundary are negative.
+  
+  ~sdf.lua~ provides a simple interface for creating 2-D SDFs of simple
+  shapes and combining them to form more complex SDFs.
+  
+  #+caption: The SDF of a circle. Gray lines are positive distances on the exterior of the circle, blue lines are negative distances on the interior of the circle and the red line is the surface of the circle itself, where the distance equals zero.
+  [[file:images/generic_sdf.png]]
+
+** Features
+   - Shapes
+     - Lines
+     - Boxes
+     - Circles
+     - Parabolas
+     - Polygons
+   - Operators
+     - Flip (unary -)
+     - Union (+)
+     - Difference (-)
+     - Intersection (|)
+     - Translation
+     - Rotate
+     
+** Usage
+*** Lines
+    Lines created with ~sdf_line()~ are true lines as opposed to
+    line-segments: they extend infinitely in both directions. Distance
+    is measured as the perpendicular distance from a point to the line
+    with one side of the line being "inside" and the other being
+    "outside." You construct a line by specifying any two points.
+    Note that these points are /not/ end-points. The two definitions
+    below result in the /same/ line.
+
+     #+begin_src lua
+-- sdf_line(x1, y1, x2, y2)
+line1 = sdf_line(0, 0, 127, 127)
+
+-- this is the exact same line as above.
+line2 = sdf_line(0, 0, 1, 1)
+     #+end_src
+     
+     [[file:images/line_from_points.png]]
+     
+     These both produce a diagonal line where the upper (white) half
+     is "inside" the line while the lower (black) half
+     is "outside."
+
+     When defining lines, order matters: reversing the points will
+     swap inside and outside. If the points are specified
+     left-to-right, everything above the line is "inside." If
+     specified right-to-left then everything above the line is
+     "outside." The only time this rule doesn't apply is if one point
+     is directly above the other. In this case, points given
+     top-to-bottom produce a line where everything to the right is
+     inside and the opposite for points given bottom-to-top.
+
+*** Boxes
+    Boxes are nice and simple, just specify the top-left and
+    bottom-right corners as you would expect.
+
+     #+begin_src lua
+-- sdf_box(x1, y1, x2, y2)
+a_box = sdf_box(32, 32, 96, 96) 
+     #+end_src
+
+     [[file:images/normal_box.png]]
+     
+*** Circles
+    Circles are similarly easy, needing a center point and a radius.
+
+     #+begin_src lua
+-- sdf_circ(x, y, r)
+a_circ = sdf_circ(vec(64, 64, 20.5)) 
+     #+end_src
+
+     [[file:images/circle.png]]
+
+*** Parabolas
+    Parabolas are similar to lines in that they extend infinitely. To
+    define a parabola, give it a position and number which determines
+    how steep the parabola is.
+
+     #+begin_src lua
+-- sdf_parabola(x, y, w)
+para = sdf_parabola(64, 32, 0.03))
+     #+end_src
+
+     [[file:images/para.png]]
+
+*** Polygons
+    You can create (convex) polygons by specifying a list of at least
+    three points in counter-clockwise order. Unlike the other
+    functions, ~sdf_polygon()~ requires each point to be enclosed in
+    it's own list so points can be easily distinguished.
+    
+     #+begin_src lua
+-- sdf_polygon({x1, y1}, {x2, y2}, {x3, y3}, ...) as many points as you want.
+tri = sdf_polygon({20, 20}, {10, 60}, {75, 55})
+     #+end_src
+
+     [[file:images/tri.png]]
+     
+*** Operators
+    Basic lines and shapes aren't all that interesting in and of
+    themselves. One of the nice things about SDFs is that you can
+    create more complex, more interesting shapes by combining them together.
+    
+**** Flip (-)
+     You can turn any SDF inside-out using the unary minus
+     operator. Here's the square from earlier with the inside and
+     outside swapped.
+
+     #+begin_src lua
+-- sdf_box(x1, y1, x2, y2)
+inside_out_box = -sdf_box(32, 32, 96, 96) 
+     #+end_src
+
+     [[file:images/inverted_box.png]]
+     
+**** Union (+)
+     Combine two SDFs into a single SDF by adding them together.
+
+     #+begin_src lua
+sq = sdf_box(49, 49, 79, 79)
+c = sdf_circ(64, 49, 15)
+img = sq + c
+     #+end_src
+     
+     #+caption: A circle added to a box and distance fields showing how distance changes for the box by itself, the circle by itself, and then the two added together.
+     [[file:images/union_operator.png]]
+
+**** Difference (-)
+     You can also subtract one SDF from another.
+
+     #+begin_src lua
+sq = sdf_box(49, 49), 79, 79)
+c = sdf_circ(64, 49, 15)
+img = sq - c
+     #+end_src
+     
+     [[file:images/sq-c_combo.png]]
+     
+     When taking the difference of two SDFs, order matters.
+
+     #+begin_src lua
+sq = sdf_box(49, 49, 79, 79)
+c = sdf_circ(64, 49, 15)
+img = c - sq
+     #+end_src
+     
+     [[file:images/c-sq_combo.png]]
+
+**** Intersection (|)
+     And we can take just the part where two SDFs meet.
+
+     #+begin_src lua
+c1 = sdf_circ(50, 64, 20)
+c2 = sdf_circ(85, 64, 20)
+img = c1|c2
+     #+end_src
+     
+     [[file:images/intersect_combo.png]]
+     
+**** Translation
+     Once you've created an SDF you can move it around using the
+     translate method.
+
+    #+begin_src lua
+sq = sdf_box(0, 0, 30, 30)
+sq = sq:translate(64, 64)
+    #+end_src
+	
+     [[file:images/translated_sq.png]]
+
+**** Rotation
+     Finally, SDFs can be rotated around an arbitrary point.
+     
+    #+begin_src lua
+sq = sdf_box(32, 32, 96, 96)
+
+-- sdf:rotate(x, y, angle)
+sq = sq:rotate(64, 64, 45/360) 
+    #+end_src
+     
+     [[file:images/rotated_sq.png]]
+
+     
+     [[file:images/line_from_points.png]]
+
+*** Boxes
+*** Circles
+*** Parabolas
+*** Polygons
+
+#+startup: inlineimages
