@@ -28,6 +28,15 @@
      - Rotate
      
 ** Usage
+   An SDF created using the primitives and operators below behaves
+   like a function which takes an x and y position and returns the
+   distance to the closest boundary.
+   #+begin_src lua
+my_circle = sdf_circ(64 64, 10)
+dist = my_circle(84, 64)
+print(dist) -- 10
+   #+end_src
+
 *** Lines
     Lines created with ~sdf_line()~ are true lines as opposed to
     line-segments: they extend infinitely in both directions. Distance
