@@ -189,13 +189,3 @@ sq = sq:rotate(64, 64, 45/360)
     #+end_src
      
      [[file:images/rotated_sq.png]]
-
-     
-     [[file:images/line_from_points.png]]
-
-*** Boxes
-*** Circles
-*** Parabolas
-*** Polygons
-
-#+startup: inlineimages
