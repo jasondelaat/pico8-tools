@@ -4,7 +4,7 @@
 ----------------------------------------------------------------------------
 -- an api for creating and manipulating signed distant fields/functions.
 -- token count: 511
-----------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 _sdf_base = {
    rotate=function(self, x, y, angle)
@@ -119,4 +119,45 @@ function sdf_polygon(...)
    p2 = points[1]
    return poly | sdf_line(p1[1], p1[2], p2[1], p2[2])
 end
--- end sdf.lua -------------------------------------------------------------
+
+moon = sdf_circ(0, 0, 32)
+hole = sdf_circ(0, 0, 27):translate(10, 0)
+img = moon - hole
+img = img:translate(64, 64)
+
+
+cls(12)
+for x=0,127 do
+   for y=0,127 do
+      local d = img(x, y)
+      local sd = img(x - 12*sin(4*y/128)-25, y - 25)
+      local wd = img(x - 7*sin(2*y/128)-25, y) % 15
+      if wd > 0.4 then
+	 pset(x, y, 1)
+      else
+	 pset(x, y, 12)
+      end
+      if sd < 0.5 then
+	 pset(x, y, 10)
+      end
+      if abs(d) < 0.5 then
+	 c = 0
+	 pset(x, y, c)
+      --elseif d < -6 then
+      --	 pset(x, y, 2)
+      --elseif d < -4 then
+      --	 c = 8
+      --	 pset(x, y, c)
+      --elseif d < -2 then
+      --	 c = 9
+      --	 pset(x, y, c)
+      elseif d < -0.5 then
+	 c = 10
+	 pset(x, y, c)
+      --elseif d > 30 then
+      --	 pset(x, y, 1)
+      end
+   end
+end
+
+function _draw()end

@@ -1,5 +1,89 @@
-cls()
-print('loading...please wait')
+-->8
+-- decompression code
+function _expand_dists(min_dist, width, vecs, dists)
+   local sdf = {}
+   local d_index = 1
+   for i=1,#vecs do
+      local v=vecs[i]
+      if v == 0 then
+	 sdf[i] = dists[d_index]
+	 d_index += 1
+      elseif v == 1 then
+	 local d1 = sdf[i-1]
+	 local d2 = sdf[i-2]
+	 sdf[i] = sqrt(2*d1^2 - d2^2 + 2)
+      elseif v == 2 then
+	 local d1 = sdf[i-width]
+	 local d2 = sdf[i-2*width]
+	 sdf[i] = sqrt(2*d1^2 - d2^2 + 2)
+      elseif v == 3 then
+	 local d1 = sdf[i-(width+1)]
+	 local d2 = sdf[i-2*(width+1)]
+	 sdf[i] = sqrt(2*d1^2 - d2^2)
+      end
+   end
+   for i=1,#sdf do
+      sdf[i] += min_dist
+   end
+   return sdf
+end
+
+function bin_to_int(s) -- should be a 2-character string
+   return (ord(s, 1) << 8) | ord(s, 2)
+end
+
+function bin_to_lst(s, bits)
+   local lst={}
+   local in_n = 0
+   local n = 0
+   for i=1,#s do
+      local m = ord(s, i)
+      local in_elem = 8
+      while in_elem > 0 do
+	 local needed = min(bits - in_n, 8)
+	 local taken = min(needed, in_elem)
+	 n = (n << taken) | (m >> (in_elem - taken))&(2^taken - 1)
+	 in_n += taken
+	 in_elem -= taken
+	 if in_n == bits then
+	    add(lst, n)
+	    n = 0
+	    in_n = 0
+	 end
+      end
+   end
+   if n != 0 then
+      add(lst, n<<(bits-in_n))
+   end
+   return lst
+end
+
+function vdt_decompress(data)
+   local min_dist = bin_to_int(sub(data, 1, 2))
+   local dist_bits = ord(data, 3)
+   local width = bin_to_int(sub(data, 4, 5))
+   local height = bin_to_int(sub(data, 6, 7))
+   local vec_length = (width*height)/4
+   local vecs = bin_to_lst(sub(data, 8, 7+vec_length), 2)
+   local dists = bin_to_lst(sub(data, 8+vec_length), dist_bits)
+   return _expand_dists(
+      min_dist,
+      width,
+      vecs,
+      dists
+   )
+end
+
+circ_field = vdt_decompress(circles)
+box_field = vdt_decompress(squares)
+tris_field = vdt_decompress(triangles)
+star_field = vdt_decompress(star)
+rot_star_field = vdt_decompress(rot_star)
+line_field = vdt_decompress(line)
+
+
+-->8
+-- animation and related code
 
 function constrain(n, min, max)
    if n > max then
@@ -11,33 +95,10 @@ function constrain(n, min, max)
    end
 end
 
--- just an approximation. nowhere near as accurate but much faster and
--- good enough for my purposes.
-_squares = {1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121}
-function fast_sqrt(n)
-   for i=11,1,-1 do
-      local s = _squares[i]
-      if s < n then
-	 return i + (n - s)/(2*i + 1)
-      end
-   end
-   return 0
-end
-
-function convert(f)
-   local field={}
-   for x=0,127 do
-      for y=0,127 do
-	 field[128*y+x] = f(x, y)
-      end
-   end
-   return field
-end
-
 function field_lerp(f, g)
    return function(x, y, t)
-      local d1 = f[128*y+x]
-      local d2 = g[128*y+x]
+      local d1 = f[128*y+x+1]
+      local d2 = g[128*y+x+1]
       return d1 + (d2 - d1)*t
    end
 end
@@ -70,74 +131,11 @@ function render(interp_func, color_func, t)
    flip()
 end
 
-ln = sdf_line(0, 7, 1, 7)
-tris_func = ln - ln:rotate(10, 7, -60/360) - ln:rotate(-10, 7, 60/360)
-td = tris_func._dist
-tris_func._dist=function(x, y)
-   return td((x%32)-16, (y%32)-16)
-end
-tris_field = convert(tris_func)
-
-circ_func = sdf_circ(0, 0, 2.5)
-cd = circ_func._dist
-circ_func._dist=function(x, y)
-   return cd((x%32)-16, (y%32)-16)
-end
-circ_field = convert(circ_func)
-
-box_func = sdf_box(-10, -10, 10, 10)
-bd = box_func._dist
-box_func._dist=function(x, y)
-   return bd((x%32)-16, (y%32)-16)
-end
-box_field = convert(box_func)
-
-sq = sdf_box(32, 32, 96, 96)
-star_func = sq + sq:rotate(64, 64, 45/360)
-star_field = convert(star_func)
-rot_star_field = convert(star_func:rotate(64, 64, 22.5/360))
-
-line_field = convert(-ln:translate(0, 57))
-
--- the sdf for this image adapted from 'the principles of painting with math' by inigo quilez: https://www.youtube.com/watch?v=0ifChJ0nJfM&t=1155s
-s = sdf_box(-0.01, 0, 0.01, 0.5)
-sd = s._dist
-s._dist = function(x, y)
-   local p = x/128
-   local q = y/128
-   p += -0.3*sin(0.4*q)
-   p += 0.007*cos(25*q)
-   p *= (3*(0.5 - y/128))^1.1
-   local d = sd(p, q)
-   return 128*d
-end
-
-sw = s:translate(0, 0) -- hacky way to make a copy...
-swd = sw._dist
-sw._dist=function(x, y)
-   return swd(x - ((y-64)/28)^2, y)
-end
-
-c = sdf_circ(0, 0, 0.2)
-cd = c._dist
-c._dist=function(x, y)
-   local p = x/128
-   local q = y/128
-   local d = cd(p, q) + 0.1*cos(10*atan2(p, q) + 7*p + 0.65)
-   return 128*d
-end
-palm_func = s + c
-palm_func = palm_func:translate(64, 64)
-palm_field = convert(palm_func)
-sway_palm_func = (c:translate(0.25, 0.5) + sw):translate(64, 64)
-sway_palm_field = convert(sway_palm_func)
-
 circ_to_box = field_lerp(circ_field, box_field)
 box_to_tris = field_lerp(box_field, tris_field)
 tris_to_star = field_lerp(tris_field, star_field)
 star_to_rot_star = field_lerp(star_field, rot_star_field)
 rot_star_to_line = field_lerp(rot_star_field, line_field)
-line_to_palm = field_lerp(line_field, palm_field)
 
 function circ_color(x, y, d)
    if d < 0 then
@@ -201,20 +199,11 @@ function line_color(x, y, d)
    end
 end
 
-function palm_color(x, y, d)
-   local n = constrain(fast_sqrt(x*(128-y))/128, 0, 1)
-   if d > 0 then
-      return flr(8 + 2*n)
-   else
-      return 0
-   end
-end
-
 cls()
 for t=0,1,0.125 do
    for x=0,127 do
       for y=0,127 do
-	 local d = circ_field[128*y+x]
+	 local d = circ_field[128*y+x+1]
 	 pset(x, y, circ_color(x, y, d))
       end
    end
@@ -251,13 +240,4 @@ for t=0,1,0.125 do
    render(rot_star_to_line, color_lerp(rot_star_color, line_color), t)
 end
 
-for t=0,1,0.0625 do
-   render(line_to_palm, color_lerp(line_color, palm_color), t)
-end
-
-t = 0
-while true do
-   t += 0.05
-   render(field_lerp(palm_field, sway_palm_field), palm_color, sin(t))
-end
-
+function _draw()end
