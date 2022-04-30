@@ -1,0 +1,198 @@
+* Curry
+  This module implements function currying and partial application in
+  Lua.
+
+*** What is function currying?
+    If you've never encountered curried functions before they can seem a
+    bit weird at first but they're actually pretty simple.
+    
+    Function currying --- which gets its name from mathematician
+    [[https://en.wikipedia.org/wiki/Haskell_Curry][Haskell Curry]] for whom the Haskell programming language is also
+    named --- is a transformation which turns a function which accepts
+    multiple arguments into a series of functions which each accept
+    only a single argument. For instance, if we have this function
+    which accepts three arguments:
+
+    #+BEGIN_SRC lua
+function sum3(x, y, z)
+   return x + y + z
+end
+    #+END_SRC
+   
+    Then when we curry it, we end up with a function which takes the
+    first argument and returns a new function. This new function
+    accepts the second argument and returns a third function which
+    accepts the third argument and finally returns the result. We
+    could write that manually like so:
+
+    #+BEGIN_SRC lua
+function sum3_curried(x)
+   return function(y)
+      return function(z)
+	 return x + y + z
+      end
+   end
+end
+    #+END_SRC
+   
+    The ~curry~ function basically does this for you so instead of
+    having to write a bunch of nested functions manually you could just
+    do this:
+
+    #+BEGIN_SRC lua
+sum3_curried = curry(3, sum3)
+    #+END_SRC
+   
+    Or this without having to define ~sum3~ first:
+
+    #+BEGIN_SRC lua
+sum3_curried = curry(
+   3, function(x, y, z)
+      return x + y + z
+   end
+)
+    #+END_SRC
+   
+    Which makes it easier to see what the function is doing without
+    having to wade through multiple levels of nested functions.
+
+*** And I would want to do that because...?
+    Curried functions can be useful in a bunch of situations but they
+    all basically come down to one thing: partial application.
+    
+    With the ~sum3~ function you have to pass all the arguments at once
+    or else you'll get an error. With ~sum3_curried~ you can pass one,
+    two, or all three and you'll always get something back. In the case
+    of one or two arguments, you'll get back a function which you can
+    stash in a variable and use later. In other words, you can pass
+    curried functions some of their arguments now and the rest of their
+    arguments at some later time.
+
+*** Okay but if I want to pass two arguments isn't ~sum3_curried(1)(2)~ kind of ugly and annoying to write?
+    It sure is!
+    
+    The ~curry~ function doesn't actually construct a bunch of nested
+    functions. Instead, the function returned by ~curry~ takes a
+    variable number of arguments and keeps track of how many it's got
+    so far. Once it has the right number of arguments, it calls the
+    actual function and returns the result.
+    
+    So these are all valid ways of calling the versions of
+    ~sum3_curried~ created with ~curry~:
+
+    #+BEGIN_SRC lua
+sum3_curried(1, 2, 3)
+sum3_curried(1)(2, 3)
+sum3_curried(1, 2)(3)
+sum3_curried(1)(2)(3)
+    #+END_SRC
+
+** Example
+    Suppose you have an array and you want to be able to append
+    elements to the end of the array. Typically you'd use the ~add~
+    function like this:
+
+    #+BEGIN_SRC lua
+lst = {}
+add(lst, 1)
+add(lst, 2)
+add(lst, 3)
+add(lst, 4)
+-- etc...
+    #+END_SRC
+    
+    But if we're always appending to the same array it would be nice
+    if we didn't need to pass it in every single time. We can do that
+    by creating an ~append~ function with the array 'baked in' by
+    creating a curried, partially applied version of ~add~. This does
+    the exact same thing as the above example:
+
+    #+BEGIN_SRC lua
+lst = {}
+append = curry(2, add)(lst) -- curried add, partially applied with lst as the first argument
+
+append(1)
+append(2)
+append(3)
+append(4)
+-- etc....
+    #+END_SRC
+    
+    So ~append~ is /implicitly/ sending ~lst~ as the first argument to
+    ~add~ and all we need to specify is the value we want to
+    append. That's an overly simple example so what about something a
+    bit more reaslistic?
+
+    Suppose players can create their own characters with some set of
+    stats:
+
+    #+BEGIN_SRC lua
+character_stats = {
+   stat_1=1,
+   stat2='b',
+   stat3=true
+   -- etc.
+}
+    #+END_SRC
+    
+    And the stats are used whenever players perform actions in-game. Since
+    different players will have different stats, we need to pass the
+    stats into any function which uses them.
+
+    #+BEGIN_SRC lua
+_action_1 = curry(
+   3,
+   function(stats, other_param_1, other_param_2) 
+   -- code for action 1
+   end
+)
+
+_action_2 = curry(
+   3,
+   function (stats, other_param_1, other_param_2) 
+   -- code for action 2
+   end
+)
+
+_action_3 = curry(
+   3,
+   function(stats, other_param_1, other_param_2) 
+   -- code for action 3
+   end
+)
+    #+END_SRC
+    
+    Then we can partially apply the actual character stats to these
+    functions to get versions which are specific to that particular
+    character.
+
+    #+BEGIN_SRC lua
+action_1 = _action_1(character_stats)
+action_2 = _action_2(character_stats)
+action_3 = _action_3(character_stats)
+    #+END_SRC
+    
+    Now you can call those functions only worrying about the other
+    parameters because we've 'baked in' the correct character stats. 
+    
+**** Why not just use globals? Wouldn't that be easier?
+     You can and it would, at least for a certain definition of
+     easier. In PICO-8 that's probably what you'll end up doing most
+     of the time /especially/ if you're scrounging for tokens because
+     you're getting near the limit. But there are advantages to this
+     approach.
+
+     Since globals are...well global you can access and modify them
+     from anywhere. That's what makes them so convenient. But that
+     also means that you can /accidentally/ modify or delete them from
+     somewhere you didn't mean to. That's what makes them a debugging
+     nightmare.
+
+     The above example is a type of dependancy injection which is
+     essentially a type of encapsulation. The exact behaviour of the
+     action functions depends on the stats and when we partially apply
+     the action functions we're locking in exactly /which/ set of
+     character stats the actions apply to. The functions are global
+     but the stats themselves aren't so they can't be accidentally
+     modified anywhere they shouldn't be; they're only modified by
+     functions they've been injected into.
