@@ -8,22 +8,22 @@ __lua__
 -- libs
 #include /pico8-tools/curry/curry.lua
 #include /pico8-tools/reax/reax.lua
-#include lzw.lua
+#include src/lzw.lua
 -->8
-#include state-machine.lua
-#include util.lua
+#include src/state-machine.lua
+#include src/util.lua
 
 -->8
-#include picomposer.lua
+#include src/picomposer.lua
 -->8
-#include album.lua
-#include menu.lua
-#include main-menu.lua
+#include src/album.lua
+#include src/menu.lua
+#include src/main-menu.lua
 -->8
-#include note-entry.lua
-#include playback.lua
+#include src/note-entry.lua
+#include src/playback.lua
 -->8
-#include export.lua
+#include src/export.lua
 __gfx__
 0000000077777777000000007777777777777777cccc7007cccccccccccc7007ccccccccccccc70077ccccccccccc70077cccccccccccccccccccccc00000000
 0000000077777777777777777777777777777777cccc7007cccccccccccc7007cccccccccccc70000077cccccccc70000077cccccccccccccccccccc00000000
