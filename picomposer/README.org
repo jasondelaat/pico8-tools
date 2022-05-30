@@ -1,0 +1,56 @@
+* PICO Composer v0.1
+
+Somewhat more capable than the previous WIP version but still pretty limited. Planned feature list at bottom of post. Suggestions/feature requests welcome.
+
+It's version 0 so basically anything/everything can change but hopefully not too drastically.
+
+** PICO Composer main menu
+When you start the cart you'll be prompted to load an album or create a new one. Use the up/down arrow keys to navigate the menu and `enter` to select.
+
+When creating a new album the album name will be the name of the file—no need to specify .p8 extension—where your work will be saved. At the moment each "album" can only have a single song, with a single voice, on instrument 0. The idea though is to have each album contain multiple songs. Space constraints may end up making that infeasible but that's the plan for now at least.
+
+** Controls:
+PICO Composer is intended to be run locally with a full keyboard and will save your work to a separate .p8 file.
+
+|--------------------+-----------------------------------+------------------------------|
+| z-m                | natural notes                     | white keys on a piano        |
+| s, d, g-j          | sharps/flats                      | black keys on a piano        |
+| 1-5                | change note value                 | 1=whole note, 5=16th note    |
+| r                  | insert a rest of the current vaue |                              |
+| w                  | save (*w*rite) the album to file  |                              |
+| -                  | move down an octave               | affects the most recent note |
+| =                  | move up an octave                 | affects the most recent note |
+| space              | start/stop playback               |                              |
+| enter              | menu select                       | supresses the PICO-8 menu    |
+| up/down arrow keys | navigate menu                     |                              |
+| backspace          | delete previous note              |                              |
+|--------------------+-----------------------------------+------------------------------|
+
+** Demo Song/Album
+Download [this cart](https://www.lexaloffle.com/bbs/files/54967/song6.p8) and save it in the same directory as `picomposer.p8.png` Load and run picomposer and when prompted select `load album`, type `song6` and press enter. It should load and after a couple of seconds you'll see the last few notes of the song. Press `space` to play the song from the beginning.
+
+In the near-ish future I'll also be implementing a separate format to export albums in a way that will allow them to be imported and used in other projects.
+
+Song 6 refers to my [Tunes!](https://www.lexaloffle.com/bbs/?tid=47406) thread on the lexaloffle bbs. This demo song is the same song as the 6th (currently last) song I've posted there.
+
+As a point of comparison: By my calculation "Song 6" as I've written it in the tracker requires 752 bytes (10 sfx patterns at 68 bytes each plus 18 music patterns by 4 bytes each) while the PICO Composer song data comes in at 750. Considering I've not yet implemented any way of repeating sections—I just had to enter every single note—that gives me hope that I'll be able to keep song sizes down. 
+
+** Future Development/Feature Wishlist
+- Export songs (for playback in games, etc.)
+- Select/edit note(s)
+- Allow all the pico-8 instruments and custom instruments
+- Multiple songs per album
+- Dynamics: volume pp, p, mp, mf, f, ff, fff 
+- Allow up to 4 voices and ability to switch around between them 
+- Clefs. As is the staff is in treble clef. Adding, at least, bass clef would be useful 
+- Bar lines 
+- crescendo, decrecendo 
+- Repeat symbols and voltas 
+- Effects/articulations (tremolo, etc.) 
+- Maybe a mode specifically for notating drum parts 
+- Possibly the ability to convert to/from the pico-8 tracker format 
+- Joining notes when possible (connected 8th notes, for instance) 
+- Ties and slurs 
+- key signatures 
+- Draw leger lines 
+- Start screen with nicer menus

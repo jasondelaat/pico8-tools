@@ -1,0 +1,83 @@
+* PICOmposer
+** In Progress (max 3)
+*** Export songs (for playback only) :feature:
+*** Select/edit note(s) :feature:
+*** Allow all the pico-8 instruments and custom instruments :feature:
+** Up Next (max 5)
+*** Dynamics: volume pp, p, mp, mf, f, ff, fff :feature:
+*** Allow up to 4 voices and ability to switch around between them :feature:
+** Done (unlimited)
+*** Add rests :feature:
+    - In progress
+    - Up next
+    - Done
+      - sprites
+      - inserting rests with 'r'
+    - Dependencies
+*** Delete previous note with backspace :feature:
+*** Adding notes after deleting notes has weird effect :bug:
+*** Add sharps/flats :feature:
+*** Octaves for a full range of notes :feature:
+*** Fix strings entered via keyboard :bug:fixed:
+    strings are reporting with the wrong number of characters,
+    they don't concatenate properly:
+    
+    ex: entered s='test' -- via keyboard
+    s..'blah' -- produces gibberish
+    #s -- gives 5
+    
+    Fix: I assumed pressing enter entered a newline character \n. It
+    does not. It enters a carriage return \r which is why the text
+    kept over-printing.
+    
+*** Main menu allowing you to load an album or create a new one :feature:
+*** Create album data structure and functions :feature:
+    Need to be a bit more organized so things will need some rewrites
+    once it's in place. But a better structure will make for better
+    software.
+*** Create menu function for creating menu states :feature:
+*** Rework note entry for new album data structure :update:
+*** Update octave changes :update:
+*** Save/load songs (for editing) :feature:
+    - [X] pretty-print s-exp from save_to_file function
+    - [X] Define file format: canonical s-expressions
+      - The file is simply a list with one element for each song
+        in the album
+      - Each song is a list, the first element is the song title
+        followed by up to four voices
+      - Each voice is a list, the first element is the
+        instrument number 0-15, the rest of the voice data is
+        notes
+      - Each note is a list but there are several kinds:
+	- A simple note has the tag 'simple', a time and 2 bytes
+          of binary note data as defined by PICO-8 for the SFX
+          section
+	- Note effects come in several types and are intended to
+          be extensible. They contain an effect tag as the first
+          element followed by whatever data is required to
+          generate the note or notes needed to produce the
+          effect.
+
+** Cancelled (unlimited)
+*** Use streams to play the songs :feature:
+    This doesn't really make sense since you have to manage the time
+    anyway so abstacting it away with a normal function is easier than
+    abstracting it away with a stream.
+** Ideas, features, bugs, etc (unlimited)
+*** Clefs. As is the staff is in treble clef. Adding, at least, bass clef would be useful :feature:
+*** Setting/changing time signature :feature:
+*** Bar lines :feature:
+*** Dynamics: crescendo, decrecendo :feature:
+*** Repeat symbols and voltas :feature:
+*** Effects/articulations (tremolo, etc.) :feature:
+*** Maybe a mode specifically for notating drum parts :feature:
+*** Possibly the ability to convert to/from the pico-8 tracker format :feature:
+*** Joining notes when possible (connected 8th notes, for instance) :feature:
+*** Ties and slurs :feature:
+*** key signatures :feature:
+*** Setting/changing tempo :feature:
+*** Draw leger lines :feature:
+
+    
+
+
