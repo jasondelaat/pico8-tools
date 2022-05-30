@@ -27,11 +27,11 @@ PICO Composer is intended to be run locally with a full keyboard and will save y
 |--------------------+-----------------------------------+------------------------------|
 
 ** Demo Song/Album
-Download [this cart](https://www.lexaloffle.com/bbs/files/54967/song6.p8) and save it in the same directory as `picomposer.p8.png` Load and run picomposer and when prompted select `load album`, type `song6` and press enter. It should load and after a couple of seconds you'll see the last few notes of the song. Press `space` to play the song from the beginning.
+Download the `song6.p8` file and save it in the same directory as `picomposer.p8.png` Load and run picomposer and when prompted select `load album`, type `song6` and press enter. It should load and after a couple of seconds you'll see the last few notes of the song. Press `space` to play the song from the beginning.
 
 In the near-ish future I'll also be implementing a separate format to export albums in a way that will allow them to be imported and used in other projects.
 
-Song 6 refers to my [Tunes!](https://www.lexaloffle.com/bbs/?tid=47406) thread on the lexaloffle bbs. This demo song is the same song as the 6th (currently last) song I've posted there.
+Song 6 refers to my [[https://www.lexaloffle.com/bbs/?tid=47406][Tunes!]] thread on the lexaloffle bbs. This demo song is the same song as the 6th (currently last) song I've posted there.
 
 As a point of comparison: By my calculation "Song 6" as I've written it in the tracker requires 752 bytes (10 sfx patterns at 68 bytes each plus 18 music patterns by 4 bytes each) while the PICO Composer song data comes in at 750. Considering I've not yet implemented any way of repeating sections—I just had to enter every single note—that gives me hope that I'll be able to keep song sizes down. 
 
