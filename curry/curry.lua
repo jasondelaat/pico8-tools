@@ -15,9 +15,9 @@ function _helper(n, f, argmts)
       extend(all_args, argmts)
       extend(all_args, {...})
       if #all_args >= n then
-	 return f(unpack(all_args))
+         return f(unpack(all_args))
       else
-	 return _helper(n, f, all_args)
+         return _helper(n, f, all_args)
       end
    end
 end
@@ -25,3 +25,4 @@ end
 function extend(lst, vs)
    foreach(vs, function(v) add(lst, v) end)
 end
+-- end curry ------------------------------------------------------------------

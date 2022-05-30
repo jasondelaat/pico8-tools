@@ -68,7 +68,7 @@ sum3_curried = curry(
     curried functions some of their arguments now and the rest of their
     arguments at some later time.
 
-*** Okay but if I want to pass two arguments isn't ~sum3_curried(1)(2)~ kind of ugly and annoying to write?
+*** But isn't ~sum3_curried(1)(2)~ kind of ugly and annoying to write?
     It sure is!
     
     The ~curry~ function doesn't actually construct a bunch of nested
