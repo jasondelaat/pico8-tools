@@ -1,9 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
--- pico composer
+-- pico composer v0.2
 -- jason delaat
--- v0.1
 
 -- libs
 #include /pico8-tools/curry/curry.lua

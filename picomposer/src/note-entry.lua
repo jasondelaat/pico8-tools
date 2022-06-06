@@ -17,26 +17,35 @@ function is_sharp(note)
    return _sharps[(note.data&63)%12]
 end
 
-function draw_notes(ni, highlight)
-   if ni then
-      local x = 2
-      for i=ni-8,ni+7 do
+function draw_notes(note_index, highlight)
+   if note_index then
+      -- pre-calculate x-positions.
+      local xs = {2}
+      local offset = 0
+      for i=note_index-8,note_index+7 do
          local n = note_q[i]
+         add(xs, xs[#xs] + (n and n.x or 8))
+         if i == note_index then
+            offset = 64 - xs[#xs]
+         end
+      end
+
+      -- draw the notes with note at note_index centered.
+      for i=note_index-8,note_index+7 do
+         local n = note_q[i]
+         local j = i - note_index + 9
          if n then
-            if highlight and i == ni then
+            if highlight and i == note_index then
                pal(0, 12)
             end
             if n.x == 16 then
-               spr(69, x+1, n.y+2)
-               spr(n.spr, x+8, n.y)
+               spr(69, xs[j]+1+offset, n.y+2)
+               spr(n.spr, xs[j]+8+offset, n.y)
             else
-               spr(n.spr, x, n.y)
+               spr(n.spr, xs[j]+offset, n.y)
             end
             pal(0, 0)
          end
-         -- advance even when there's no note so the note being
-         -- played is always in the center of the screen.
-         x += n and n.x or 8
       end
    end
 end
