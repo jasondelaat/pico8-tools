@@ -1,3 +1,4 @@
+log = 'log.txt'
 -- save/load/export
 function _note_types(...)
    local types = {...}
@@ -74,7 +75,6 @@ function save_album()
    memset(0x8000, 0, 0x4300)
    local s = pp_album()
    s = lzw_compress(s)
-   --printh(#s, 'log.txt', true)
    poke2(0x8000, #s)
    for i=1,#s do
       poke(0x8001+i, ord(sub(s, i, i)))
@@ -169,3 +169,73 @@ function decompress_album()
    end
    return lzw_decompress(s)
 end
+
+function export_album()
+   --memset(0x8000, 0, 0x4300)
+   local bin_album = ''
+   bin_album ..= ex_num_songs()
+   for title,song in pairs(album.songs) do
+      bin_album ..= ex_song(title, song)
+      printh('song_len (1): '..ord(bin_album, 2), log)
+      printh('song_len (2): '..ord(bin_album, 3), log)
+   end
+   write_to_mem(bin_album, 0x8000)
+   printh('mem 2: '..peek(0x8001), log)
+   printh('mem 3: '..peek(0x8002), log)
+   write_to_disk('.music.p8')
+end
+
+function ex_num_songs()
+   local n = 0
+   for t,s in pairs(album.songs) do
+      n += 1
+   end
+   printh('num_songs: '..n, log, true)
+   return chr(n)
+end
+
+function ex_song(title, song)
+   local bin_song = ''
+   bin_song ..= ex_title(title)
+   for voice in all(song.voices) do
+      bin_song ..= ex_voice(voice)
+   end
+   printh('song_len: '..#bin_song, log)
+   return bytes(#bin_song)..bin_song
+end
+
+function ex_title(title)
+   printh('title_len: '..#title, log)
+   return chr(#title)..title
+end
+
+function ex_voice(voice)
+   local bin_voice = ''
+   for note in all(voice.notes) do
+      bin_voice ..= ex_note(note)
+   end
+   bin_voice = lzw_compress(bin_voice)
+   printh('voice_len: '..#bin_voice, log)
+   return bytes(#bin_voice)..bin_voice
+end
+
+function ex_note(note)
+   return chr(calc_note_speed(note))..bytes(note.data)
+end
+
+function bytes(n)
+   return chr((n>>8)&255)..chr(n&255)
+end
+
+function write_to_mem(bin_string, addr)
+   for i=1,#bin_string do
+      poke(addr + i - 1, ord(bin_string, i))
+   end
+   printh('bin_str: '..#bin_string, log)
+   printh('mem: '..tostr(addr+#bin_string, 1), log)
+end
+
+function write_to_disk(ext)
+   cstore(0, 0x8000, 0x4300, album_name..ext)
+end
+

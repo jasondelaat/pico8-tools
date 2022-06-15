@@ -43,7 +43,7 @@ function menu(x, y, ...) -- input: any number of {option, callback}
    return m_state
 end
 
-function text_entry(x, y, prompt)
+function text_entry(x, y, prompt, allow_empty)
    local te_state
    te_state = {
       value='',
@@ -68,6 +68,8 @@ function text_entry(x, y, prompt)
    events:map(function(c)
             if c != '\r' and c != '\b' then
                te_state.value ..= c
+            elseif c== '\r' and allow_empty then
+               te_state.value ..= ' '
             end
    end)
    return te_state

@@ -22,13 +22,18 @@ end
 
 function new_song(album, title, bpm, time_string)
    local time_sig = parse_time_sig(time_string)
+   if not time_sig then
+      time_sig = {4, 4}
+   end
    album.songs[title] = {bpm=bpm, time=time_sig, voices={}}
    edit_song(album, title)
 end
 
 function parse_time_sig(s)
    local split_s = split(s, '/')
-   return {tonum(split_s[1]), tonum(split_s[2])}
+   if #split_s == 2 then
+      return {tonum(split_s[1]), tonum(split_s[2])}
+   end
 end
 
 function add_note(album, note)

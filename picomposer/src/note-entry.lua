@@ -151,9 +151,7 @@ end
 
 _play_note = {
    simple=function(note)
-      local bpm = album.edit.song.bpm
-      local bpnote = album.edit.song.time[2]
-      local speed = (7200 * bpnote)/(bpm * note.value)
+      local speed = calc_note_speed(note)
       poke2(0x3200, note.data)
       poke(0x3200+65, speed)
       sfx(0)
@@ -162,6 +160,12 @@ _play_note = {
       _play_note.simple(note)
    end
 }
+
+function calc_note_speed(note)
+   local bpm = album.edit.song.bpm
+   local bpnote = album.edit.song.time[2]
+   return (7200 / bpm / note.value) * bpnote
+end
 
 function show_note(note)
    _show_note[note.type](note)
@@ -302,6 +306,10 @@ note_entry = {
          -- save (aka: _w_rite)
          events:filter(eq('w'))
             :map(save_album)
+
+         -- export (for use in other projects)
+         events:filter(eq('e'))
+            :map(export_album)
       end
    end,
    update=function()

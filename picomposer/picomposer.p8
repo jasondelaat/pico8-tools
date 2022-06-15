@@ -1,13 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
--- pico composer v0.2
+-- pico composer v0.3
 -- jason delaat
 
 -- libs
 #include /pico8-tools/curry/curry.lua
 #include /pico8-tools/reax/reax.lua
-#include src/lzw.lua
+#include src/lzw_encode.lua
+#include src/lzw_decode.lua
 -->8
 #include src/state-machine.lua
 #include src/util.lua
