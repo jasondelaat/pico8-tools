@@ -43,7 +43,7 @@ do
          verb('se', 'southeast')(_go_dir('se'))
          verb('nw', 'northwest')(_go_dir('nw'))
          verb('sw', 'southwest')(_go_dir('sw'))
-         verb('u', 'up')(_go_dir('u'))
+         verb('u', 'up', 'climb')(_go_dir('u'))
          verb('d', 'down')(_go_dir('d'))
          verb('in')(_go_dir('in'))
          verb('out')(_go_dir('out'))
