@@ -54,7 +54,7 @@ do
                   append_message(name)
                end
          end)
-         verb('take', 'pick')
+         verb('take', 'pick', 'get')
          (function(_ENV, obj)
                if obj and contains(contents, obj) and
                   obj.attributes&(static|scenery) == 0 then
