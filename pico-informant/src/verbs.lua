@@ -26,7 +26,9 @@ do
          local _go_dir = function(d)
             return function(_ENV)
                local room = exits[d]
-               if room then
+               if type(room) == 'string' then
+                  append_message(room)
+               elseif room then
                   location(room)
                   clear_messages()
                else
@@ -45,7 +47,7 @@ do
          verb('sw', 'southwest')(_go_dir('sw'))
          verb('u', 'up', 'climb')(_go_dir('u'))
          verb('d', 'down')(_go_dir('d'))
-         verb('in')(_go_dir('in'))
+         verb('in', 'enter')(_go_dir('in'))
          verb('out')(_go_dir('out'))
          verb('inventory', 'i')
          (function(_ENV)

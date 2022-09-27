@@ -57,6 +57,7 @@ branch = object('wide firm bough', top_of_tree)
 -- connecting the rooms
 before_cottage
    :e_to(forest)
+   :in_to("it's such a lovely day -- much\ntoo nice to go inside.\n")
 
 forest
    :w_to(before_cottage)
