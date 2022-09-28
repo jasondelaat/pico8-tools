@@ -77,6 +77,10 @@ do
          end)
          verb('put')
          (function(_ENV, obj, target)
+               if not obj or not target then
+                  append_message("sorry, i don't know what you\nmean.\n")
+                  return
+               end
                if contains(player.contents, obj) then
                   if contains(contents, target) then
                      if target.attributes&(container|supporter) > 0 then
