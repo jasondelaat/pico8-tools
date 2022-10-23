@@ -22,15 +22,6 @@ tests. Just ~#include testo-8.lua~, write tests and run the cart. If
 you've defined your own ~_init~ you'll probably need to comment it out
 to get the tests to run.
 
-Here's a cart with some simple functions containing errors and some
-tests most of which fail just to give you an idea of how it works. 
-
-[testo8-0]
-
-If you download the cart and fix the errors you'll see this:
-
-[[testo-8_0.png]]
-
 A very simple test might look something like this:
 #+begin_src lua
 test('some simple addition')
