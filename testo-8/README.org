@@ -1,0 +1,173 @@
+* Testo-8 Test Framework
+
+I know a lot of people, myself included, usually write their pico~8
+code a little off the cuff tinkering with it until it works. Which
+tends to be more fun in my experience. But it can also be incredibly
+frustrating if I'm working on sometime more complex where every time I
+change something I break something else. And in those cases planning
+out some formal tests helps me maintain my sanity and get the thing
+actually working much faster than I probably would otherwise. And
+since I'm working on something fairly complex at the moment, I took a
+bit of a detour and put together a little test framework and thought
+I'd make it available for anybody else who might find it useful.
+
+*** Testo-8
+
+The framework is pretty simple. It's just a single function ~test~
+which returns an object exposing methods— ~given~, ~when~, ~result~
+and ~cleanup~ —for defining the test. 
+
+Testo-8 defines an ~_init~ function which automatically runs the
+tests. Just ~#include testo-8.lua~, write tests and run the cart. If
+you've defined your own ~_init~ you'll probably need to comment it out
+to get the tests to run.
+
+Here's a cart with some simple functions containing errors and some
+tests most of which fail just to give you an idea of how it works. 
+
+[testo8-0]
+
+If you download the cart and fix the errors you'll see this:
+
+[[testo-8_0.png]]
+
+A very simple test might look something like this:
+#+begin_src lua
+test('some simple addition')
+   :given('the number one', function() return 1 end)
+   :when('adding 2', function(n) return n+2 end)
+   :result('should equal 3', function(r) return r == 3 end)
+#+end_src
+
+The methods ~given~, ~when~ and ~result~ —which I'll call clauses—all
+take a string as their first argument and a function as their second,
+while ~test~ takes a string argument only. The strings are used to
+build the output message if the test fails.
+
+The function arguments taken by the other methods serve different
+purposes:
+
+- ~given~ should return the object(s) being tested. (1 in the example)
+- ~when~ takes the object(s) being tested as input and does something
+  with it returning the result(s) (add 2)
+- ~result~ takes the result(s) and should return a boolean, true if
+  the test passes and false if it fails. (does 1+2 == 3?)
+  
+Each test has exactly one ~given~ clause below which will be one or
+more ~when~ clauses. Each ~when~ clause contains one or more ~result~
+clauses and can optionally be ended with a ~cleanup~ clause. More on
+that later. So an actual test might look something like this:
+
+#+begin_src lua
+-- the ...'s are just a placeholders for some appropriate function
+test('some test')
+   :given('an object to test', ...)
+   :when('1st when', ...)
+   :result('result 1', ...)
+   :result('result 2', ...)
+   :result('result 3', ...)
+
+   :when('2nd when', ...)
+   :result('result 4', ...)
+   :result('result 5', ...)
+   :result('result 6', ...)
+   :cleanup(...)
+
+   :when('3rd when', ...)
+   :result('result 7', ...)
+   :result('result 8', ...)
+#+end_src
+
+The number of ~result~ clauses is the actual number of tests that will
+be run so the above example would be eight tests. Each ~result~ clause
+is executed as follows: The ~given~ clause is executed to generate the
+object(s) to test. The test object(s) are passed to the ~when~ clause
+which appears /above/ the ~result~ and finally the results are passed
+to the ~result~ clause which determines whether the test passes or fails.
+
+So in the above example the ~given~ clause will run eight times, once
+for every ~result~. The first ~when~ clause will be called three times
+and so will the second while the third ~when~ clause will only be
+called twice.
+
+~cleanup~ takes a single function as its argument and is used to clean
+up after a test if, for instance, the test modifies some global state
+which needs to be reset in-between tests. The ~cleanup~ clause is
+optional but if it exists will be called /after/ each ~result~ clause
+inside the same ~when~. The ~cleanup~ in the above example would
+therefore be called three times, once after each of ~result`s 4, 5
+and 6.
+  
+*** Modules and Testing
+
+I rely heavily on an external editor and spreading all my code around
+a bunch of files. If that's not how you work this may not be super
+practical. But here's a quick run~down of how I (currently) work on a
+project.
+
+**** Modules
+
+Even though Pico-8 Lua doesn't technically have modules I generally
+try to write things in a modular way and ~#include~ with the help of
+~do...end~ gives me something module-like.
+
+A vastly oversimplified example would be something like this:
+    
+#+begin_src lua
+-- player.lua
+local pos = {x=64, y=64}
+local s = 1
+
+local function move(var, dist)
+   return function()
+      pos[var] += dist
+   end
+end
+
+move_left = move('x', -2)
+move_right = move('x', 2)
+move_up = move('y', -2)
+move_down = move('y', 2)
+
+function draw_player()
+   spr(s, pos.x, pos.y)
+end
+#+end_src
+
+Which I include inside of a ~do...end~ block like so:
+
+[[demo_0.png]]
+
+Writing modules like this doesn't really cost much extra because:
+
+1. These are all functions I'd write anyway
+2. The ~local~ keyword doesn't use any tokens
+3. The ~do...end~ costs just a single token
+4. The added encapsulation given module local variables means I can't
+   accidentally mess of things like the player position from other
+   parts of my code because ~pos~ doesn't exist outside of the module.
+   
+Importantly, I don't put the surrounding ~do...end~ in the module file
+itself. Because when it come to writing the actual tests, I'll put
+those in another separate file and then include it inside the same
+~do...end~ block as before.
+
+[[demo_1.png]]
+
+This makes the tests part of the same module so they can access and
+test all the local data and functions. Once I'm sure everything is
+working properly I can just comment out the ~#include~ for the test
+file and free up all those tokens. 
+
+*** Issues
+1. Since Lua doesn't have execption handling capabilities like
+   ~try...catch~ or similar, I'm not able to intercept certain errors
+   and report them as test failures. So things like attempting to
+   index a nil value, etc. will still cause the cart to crash and
+   you'll have to fix those problems before the test will run.
+2. The above can also lead to occasionally cryptic error messages
+   saying that there's an error with testo-8 itself. This is certainly
+   possible but usually it means you've passed nil, or something else,
+   where testo-8 is expecting a function. If you're frequently
+   commenting out parts of your code make sure you haven't commented
+   out a function which you're using in a test.
