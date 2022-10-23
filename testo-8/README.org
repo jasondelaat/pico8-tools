@@ -127,7 +127,7 @@ end
 
 Which I include inside of a ~do...end~ block like so:
 
-[[demo_0.png]]
+[[https://github.com/jasondelaat/pico8-tools/blob/release/testo-8/images/demo_0.png]]
 
 Writing modules like this doesn't really cost much extra because:
 
@@ -143,7 +143,7 @@ itself. Because when it come to writing the actual tests, I'll put
 those in another separate file and then include it inside the same
 ~do...end~ block as before.
 
-[[demo_1.png]]
+[[https://github.com/jasondelaat/pico8-tools/blob/release/testo-8/images/demo_1.png]]
 
 This makes the tests part of the same module so they can access and
 test all the local data and functions. Once I'm sure everything is
