@@ -35,6 +35,8 @@ take a string as their first argument and a function as their second,
 while ~test~ takes a string argument only. The strings are used to
 build the output message if the test fails.
 
+[[https://github.com/jasondelaat/pico8-tools/blob/release/testo-8/images/failures.png]]
+
 The function arguments taken by the other methods serve different
 purposes:
 
