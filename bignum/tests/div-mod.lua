@@ -1,0 +1,36 @@
+--test('small number division')
+--   :given('45 and 5',
+--          function()
+--             return bignum(45), 5
+--         end)
+--   :when('45/5',
+--         function(a, b)
+--            return a / b
+--        end)
+--   :result('should have length 1',
+--           function(r)
+--              print(#r)
+--              return #r == 1
+--          end)
+--   :result('should be 9',
+--           function(r)
+--              return r[1] == 9
+--          end)
+
+--test('big number divided by small number')
+--   :given('2^15 and 8',
+--          function()
+--             return bignum(2^14)*bignum(2), 8
+--         end)
+--   :when('2^15 / 8',
+--         function(a, b)
+--            return a / b
+--        end)
+--   :result('should have length 1',
+--           function(r)
+--              return #r == 1
+--          end)
+--   :result('should be 2^12',
+--           function(r)
+--              return r[1] == 2^12
+--          end)
